@@ -50,3 +50,12 @@ class UserResponse(BaseModel):
     email: str
     is_active: bool
     created_at: datetime
+
+
+class LoginResponse(BaseModel):
+    user: UserResponse
+    message: str = "Authenticated successfully"
+
+
+class MessageResponse(BaseModel):
+    message: str

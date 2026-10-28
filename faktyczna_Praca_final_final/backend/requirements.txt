@@ -1,8 +1,9 @@
 # FastAPI and Server
 fastapi>=0.115.0,<1.0.0
 uvicorn[standard]>=0.32.0,<1.0.0
-pydantic>=2.9.0,<3.0.0
+pydantic[email]>=2.9.0,<3.0.0
 pydantic-settings>=2.6.0,<3.0.0
+email-validator>=2.2.0
 
 # Database & ORM
 sqlalchemy[asyncio]>=2.0.36,<3.0.0

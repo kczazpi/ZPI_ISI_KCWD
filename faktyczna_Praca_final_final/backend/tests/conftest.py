@@ -5,8 +5,12 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.api.deps import get_db
+from app.core.rate_limiter import limiter
 from app.db.base import Base
 from app.main import app
+
+# Disable rate limiting for the automated test suite
+limiter.enabled = False
 
 # Test database using in-memory SQLite with async driver
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

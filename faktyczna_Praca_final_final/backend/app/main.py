@@ -1,7 +1,10 @@
 from contextlib import asynccontextmanager
+from typing import Any, cast
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.api.v1.router import api_router
 from app.core.config import settings
@@ -10,6 +13,7 @@ from app.core.exceptions import (
     app_exception_handler,
     general_exception_handler,
 )
+from app.core.rate_limiter import limiter
 
 
 @asynccontextmanager
@@ -26,6 +30,10 @@ app = FastAPI(
     redoc_url=f"{settings.API_V1_PREFIX}/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
 )
+
+# Slowapi rate limiter state & handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, cast(Any, _rate_limit_exceeded_handler))
 
 # Exception handlers
 app.add_exception_handler(AppException, app_exception_handler)

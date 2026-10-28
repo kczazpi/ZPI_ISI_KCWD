@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,7 +29,7 @@ class Settings(BaseSettings):
     SESSION_COOKIE_NAME: str = "e2ee_session_id"
     SESSION_MAX_AGE_SECONDS: int = 604800  # 7 days
     COOKIE_SECURE: bool = False
-    COOKIE_SAMESITE: str = "lax"
+    COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
 
     # Argon2id Server Parameters
     ARGON2_TIME_COST: int = 3
