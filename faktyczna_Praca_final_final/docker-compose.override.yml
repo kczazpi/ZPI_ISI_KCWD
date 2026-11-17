@@ -1,4 +1,11 @@
 # Development overrides for local debugging and live reloading
+#
+# This file is automatically merged with docker-compose.yml by Docker Compose.
+# It overrides the production configuration for local development:
+# - Backend: live reload via uvicorn --reload, source mounted as volume
+# - Frontend: Vite dev server (hot module replacement) instead of Nginx
+# - Database: port exposed on host for direct access with psql/pgAdmin
+
 services:
   db:
     ports:
@@ -10,5 +17,32 @@ services:
     environment:
       - DEBUG=true
       - ENVIRONMENT=development
+      # In dev, the browser accesses the frontend on :5173 and backend on :8000 directly
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173
     command: >
         sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      # Use the development stage — Vite dev server with HMR
+      target: development
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      # Mount source for hot module replacement
+      - ./frontend:/app
+      # Anonymous volume to prevent overwriting node_modules from the image
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      # API calls are proxied to backend via vite.config.ts proxy setting
+      - VITE_API_URL=
+    # Override healthcheck for the Vite dev server
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5173 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
